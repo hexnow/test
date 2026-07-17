@@ -1,179 +1,299 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexgram — Connection Established</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HEXGRAM — этот домен занят</title>
+<style>
+  :root {
+    --bg: #07070c;
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.62);
+    --border: rgba(255, 255, 255, 0.14);
+    --accent: #7c8cff;
+    --accent-2: #4dd6c1;
+  }
 
-        body {
-            background-color: #0a0a0c;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-            perspective: 1000px;
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Фоновая сетка для киберпанк-атмосферы */
-        .grid-bg {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                linear-gradient(to right, rgba(125, 80, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(125, 80, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: rotateX(60deg) translateY(-30%);
-            top: 0;
-            left: -50%;
-            z-index: 1;
-            animation: grid-move 20s linear infinite;
-        }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
 
-        @keyframes grid-move {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 800px; }
-        }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+  }
 
-        .container {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            padding: 2.5rem;
-            background: rgba(15, 15, 20, 0.8);
-            border: 1px solid rgba(125, 80, 255, 0.2);
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(125, 80, 255, 0.1);
-            backdrop-filter: blur(12px);
-            max-width: 450px;
-            width: 90%;
-            animation: fade-in 1.2s ease-out;
-        }
+  /* ---------- animated background blobs ---------- */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.55;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .blob-1 {
+    width: 55vmax; height: 55vmax;
+    background: radial-gradient(circle at 30% 30%, #3d2f8f, transparent 65%);
+    top: -20vmax; left: -15vmax;
+    animation: drift-1 26s ease-in-out infinite alternate;
+  }
+  .blob-2 {
+    width: 46vmax; height: 46vmax;
+    background: radial-gradient(circle at 60% 40%, #114b52, transparent 65%);
+    bottom: -18vmax; right: -12vmax;
+    animation: drift-2 32s ease-in-out infinite alternate;
+  }
+  .blob-3 {
+    width: 34vmax; height: 34vmax;
+    background: radial-gradient(circle at 50% 50%, #4a1d5e, transparent 65%);
+    top: 40%; left: 55%;
+    animation: drift-3 22s ease-in-out infinite alternate;
+  }
+  @keyframes drift-1 { to { transform: translate(10vmax, 8vmax) scale(1.15); } }
+  @keyframes drift-2 { to { transform: translate(-8vmax, -10vmax) scale(1.1); } }
+  @keyframes drift-3 { to { transform: translate(-12vmax, 6vmax) scale(0.9); } }
 
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  /* faint hex grid texture */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 45%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 45%, black 30%, transparent 75%);
+    pointer-events: none;
+  }
 
-        .logo {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, #a855f7, #6366f1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-            position: relative;
-            display: inline-block;
-        }
+  /* ---------- glass card ---------- */
+  .card {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 56px 48px 48px;
+    max-width: 560px;
+    width: calc(100% - 40px);
+    border-radius: 24px;
+    background: linear-gradient(155deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.06));
+    border: 1px solid var(--border);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    box-shadow:
+      0 24px 64px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  /* specular top edge */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 18%; right: 18%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent);
+  }
 
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 25%;
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #a855f7, transparent);
-        }
+  .logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 28px;
+    display: block;
+    filter: drop-shadow(0 0 18px rgba(124, 140, 255, 0.55));
+    animation: logo-float 6s ease-in-out infinite;
+  }
+  @keyframes logo-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+  }
 
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            background: rgba(34, 197, 94, 0.1);
-            color: #4ade80;
-            padding: 6px 16px;
-            border-radius: 99px;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            margin: 1.5rem 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
+  h1 {
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    margin-right: -0.28em; /* compensate tracking */
+    background: linear-gradient(115deg, #ffffff 20%, #aab4ff 50%, #7ee8d8 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 18px;
+  }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #22c55e;
-            animation: blink 1.5s ease-in-out infinite;
-        }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 26px;
+  }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 10px var(--accent-2);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.78); }
+  }
 
-        @keyframes blink {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
+  .desc {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 40ch;
+    margin: 0 auto;
+  }
 
-        p {
-            font-size: 1rem;
-            color: #94a3b8;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
+  .divider {
+    width: 64px;
+    height: 1px;
+    margin: 30px auto 22px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  }
 
-        .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #8b5cf6, #4f46e5);
-            color: #ffffff;
-            text-decoration: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(125, 80, 255, 0.3);
-            cursor: pointer;
-        }
+  .footer {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+  }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(125, 80, 255, 0.5);
-            background: linear-gradient(135deg, #966ef7, #5c54ed);
-        }
+  /* ---------- custom cursor ---------- */
+  .cursor-hex, .cursor-dot { display: none; }
 
-        .footer {
-            margin-top: 2rem;
-            font-size: 0.75rem;
-            color: #4b5563;
-        }
-    </style>
+  @media (hover: hover) and (pointer: fine) {
+    body { cursor: none; }
+
+    .cursor-dot {
+      display: block;
+      position: fixed;
+      z-index: 100;
+      width: 6px; height: 6px;
+      margin: -3px 0 0 -3px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px rgba(255,255,255,0.9);
+      pointer-events: none;
+      top: 0; left: 0;
+    }
+
+    .cursor-hex {
+      display: block;
+      position: fixed;
+      z-index: 99;
+      width: 44px; height: 44px;
+      margin: -22px 0 0 -22px;
+      pointer-events: none;
+      top: 0; left: 0;
+    }
+    .cursor-hex svg {
+      width: 100%; height: 100%;
+      overflow: visible;
+      animation: hex-spin 9s linear infinite;
+    }
+    @keyframes hex-spin { to { transform: rotate(360deg); } }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 480px) {
+    .card { padding: 44px 24px 38px; border-radius: 20px; }
+    .logo { width: 58px; height: 58px; margin-bottom: 22px; }
+    .status { font-size: 13px; padding: 8px 16px; }
+    .desc { font-size: 15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .logo, .dot, .cursor-hex svg { animation: none !important; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="grid-bg"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="grid-overlay"></div>
 
-    <div class="container">
-        <div class="logo">HEXGRAM</div>
-        <div>
-            <span class="status">
-                <span class="status-dot"></span>
-                Domain Active
-            </span>
-        </div>
-        <p>Добро пожаловать в Hexgram. Защищённое соединение успешно установлено. Проект находится в разработке.</p>
-        <button class="btn" onclick="testClick()">Проверить отклик</button>
-        
-        <div class="footer">
-            © 2026 hexgram.loc.cc | 100 Years Protection
-        </div>
-    </div>
+  <main class="card">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="hexg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8b9aff"/>
+          <stop offset="1" stop-color="#4dd6c1"/>
+        </linearGradient>
+      </defs>
+      <polygon points="50,6 88,28 88,72 50,94 12,72 12,28"
+               fill="none" stroke="url(#hexg)" stroke-width="4" stroke-linejoin="round"/>
+      <polygon points="50,26 71,38 71,62 50,74 29,62 29,38"
+               fill="rgba(139,154,255,0.12)" stroke="url(#hexg)" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg>
 
-    <script>
-        function testClick() {
-            alert('Бэк коннект стабилен! Система готова к деплою.');
-        }
-    </script>
+    <h1>HEXGRAM</h1>
+
+    <div class="status"><span class="dot"></span>Этот домен занят</div>
+
+    <p class="desc">Здесь скоро появится нечто&nbsp;большее. Домен зарезервирован и&nbsp;находится под&nbsp;присмотром.</p>
+
+    <div class="divider"></div>
+    <div class="footer">hexgram &middot; 2026</div>
+  </main>
+
+  <!-- custom cursor -->
+  <div class="cursor-hex" aria-hidden="true">
+    <svg viewBox="0 0 100 100">
+      <polygon points="50,8 86,29 86,71 50,92 14,71 14,29"
+               fill="rgba(124,140,255,0.08)"
+               stroke="rgba(139,154,255,0.85)" stroke-width="4"
+               stroke-linejoin="round"
+               style="filter: drop-shadow(0 0 6px rgba(124,140,255,0.7));"/>
+    </svg>
+  </div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+<script>
+(function () {
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!fine) return;
+
+  var hex = document.querySelector(".cursor-hex");
+  var dot = document.querySelector(".cursor-dot");
+  var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  var hx = mx, hy = my;
+
+  document.addEventListener("mousemove", function (e) {
+    mx = e.clientX;
+    my = e.clientY;
+    dot.style.transform = "translate(" + mx + "px," + my + "px)";
+  });
+
+  function tick() {
+    // smooth follow (lerp) — гексагон плавно догоняет точку
+    hx += (mx - hx) * 0.16;
+    hy += (my - hy) * 0.16;
+    hex.style.transform = "translate(" + hx + "px," + hy + "px)";
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
 </body>
 </html>
